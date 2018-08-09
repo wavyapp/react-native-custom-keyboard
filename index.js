@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 
 import {
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types'
 
-const { CustomKeyboard } = NativeModules;
+const { CustomKeyboard} = NativeModules;
 
 const {
   install, uninstall, getSelectionRange,
@@ -38,7 +37,7 @@ const getKeyboardHeightByType = (type) => {
 
 class CustomKeyboardContainer extends Component {
   render() {
-    const { tag, type } = this.props;
+    const {tag, type} = this.props;
     const factory = keyboardTypeRegistry[type].factory;
     const inputFilter = keyboardTypeRegistry[type].inputFilter
     if (!factory) {
@@ -50,7 +49,7 @@ class CustomKeyboardContainer extends Component {
   }
 }
 
-AppRegistry.registerComponent("CustomKeyboard", () => CustomKeyboardContainer);
+AppRegistry.registerComponent("CustomKeyboard", ()=>CustomKeyboardContainer);
 
 export class CustomTextInput extends Component {
   static propTypes = {
@@ -79,9 +78,11 @@ export class CustomTextInput extends Component {
     if (ref) {
       this.input = ref;
     }
+    return this.props.onRef && this.props.onRef(ref);
   };
   render() {
     const { customKeyboardType, ...others } = this.props;
-    return <TextInput {...others} keyboardType={'numeric'} ref={this.onRef} />;
+    return <TextInput {...others} keyboardType={'numeric'} ref={this.onRef}/>;
   }
 }
+
