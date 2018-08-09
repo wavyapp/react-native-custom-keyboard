@@ -9,7 +9,9 @@ import {
 import PropTypes from 'prop-types'
 
 const { CustomKeyboard } = NativeModules;
-
+if (!CustomKeyboard) {
+  console.info('Missing native module CustomKeyboard')
+}
 const {
   install,
   uninstall,
@@ -21,7 +23,7 @@ const {
   moveRight,
   switchSystemKeyboard,
   submitEditing,
-} = CustomKeyboard;
+} = CustomKeyboard || {};
 
 export {
   install,
