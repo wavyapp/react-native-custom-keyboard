@@ -8,19 +8,29 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types'
 
-const { CustomKeyboard} = NativeModules;
+const { CustomKeyboard } = NativeModules;
 
 const {
-  install, uninstall, getSelectionRange,
-  insertText, backSpace, doDelete,
-  moveLeft, moveRight,
+  install,
+  uninstall,
+  getSelectionRange,
+  insertText,
+  backSpace,
+  doDelete,
+  moveLeft,
+  moveRight,
   switchSystemKeyboard,
 } = CustomKeyboard;
 
 export {
-  install, uninstall, getSelectionRange,
-  insertText, backSpace, doDelete,
-  moveLeft, moveRight,
+  install,
+  uninstall,
+  getSelectionRange,
+  insertText,
+  backSpace,
+  doDelete,
+  moveLeft,
+  moveRight,
   switchSystemKeyboard,
 };
 
