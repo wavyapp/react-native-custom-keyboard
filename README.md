@@ -1,6 +1,8 @@
 
 # react-native-custom-keyboard
 
+Support ReactNative 0.56+
+
 ## Getting started
 
 `$ npm install react-native-custom-keyboard --save`
