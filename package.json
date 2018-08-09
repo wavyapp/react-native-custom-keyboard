@@ -1,22 +1,21 @@
-
 {
-  "name": "react-native-custom-keyboard",
-  "version": "1.0.3",
-  "description": "",
+  "name": "@wavyapp/react-native-custom-keyboard",
+  "version": "2.0.0",
+  "description": "react native custom keyboard for both Android and iOS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reactnativecn/react-native-custom-keyboard.git"
+    "url": "git+https://github.com/wavyapp/react-native-custom-keyboard"
   },
   "keywords": [
     "react-native"
   ],
-  "author": "",
-  "license": "",
+  "author": "ufolux",
+  "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.29.0"
+    "react-native": "^0.56"
   }
 }
