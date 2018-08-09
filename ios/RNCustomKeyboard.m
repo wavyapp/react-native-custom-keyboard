@@ -1,3 +1,4 @@
+
 #import "RNCustomKeyboard.h"
 #import <React/RCTBridge+Private.h>
 #import <React/RCTUIManager.h>
@@ -29,10 +30,10 @@ RCT_EXPORT_METHOD(install:(nonnull NSNumber *)reactTag withType:(nonnull NSStrin
     [_dicInputMaxLength setValue:[NSNumber numberWithInt:maxLength] forKey:[reactTag stringValue]];
     
     _inputView.autoresizingMask = UIViewAutoresizingNone;
-    
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
     _inputView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, inputViewHeight);
-
+    _inputView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
+    
     view.inputView = _inputView;
     [view reloadInputViews];
 }
@@ -137,3 +138,4 @@ RCT_EXPORT_METHOD(switchSystemKeyboard:(nonnull NSNumber*) reactTag) {
 }
 
 @end
+
