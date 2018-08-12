@@ -4,7 +4,6 @@
   "description": "react native custom keyboard for both Android and iOS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
