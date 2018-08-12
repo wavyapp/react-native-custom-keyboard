@@ -23,6 +23,7 @@ const {
   moveRight,
   switchSystemKeyboard,
   submitEditing,
+  insertKey,
 } = CustomKeyboard || {};
 
 export {
@@ -36,6 +37,7 @@ export {
   moveRight,
   switchSystemKeyboard,
   submitEditing,
+  insertKey,
 };
 
 const keyboardTypeRegistry = {};

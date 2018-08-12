@@ -82,6 +82,17 @@ RCT_EXPORT_METHOD(submitEditing:(nonnull NSNumber *)reactTag withText:(NSString*
 }
 
 
+RCT_EXPORT_METHOD(insertKey:(nonnull NSNumber *)reactTag withText:(NSString*)text) {
+    UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+    [_bridge.eventDispatcher sendTextEventWithType:RCTTextEventTypeKeyPress
+                                reactTag:reactTag
+                                text:view.attributedText.string
+                                key:text
+                                eventCount:0];
+
+}
+
+
 RCT_EXPORT_METHOD(insertText:(nonnull NSNumber *)reactTag withText:(NSString*)text) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
     if (_dicInputMaxLength != nil) {
