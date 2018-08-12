@@ -3,8 +3,7 @@
   "version": "2.0.3",
   "description": "react native custom keyboard for both Android and iOS",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wavyapp/react-native-custom-keyboard"
