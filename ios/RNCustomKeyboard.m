@@ -3,6 +3,7 @@
 #import <React/RCTBridge+Private.h>
 #import <React/RCTUIManager.h>
 #import <RCTText/RCTBaseTextInputView.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 @implementation RNCustomKeyboard
 
@@ -73,6 +74,7 @@ RCT_EXPORT_METHOD(getSelectionRange:(nonnull NSNumber *)reactTag callback:(RCTRe
 
 RCT_EXPORT_METHOD(submitEditing:(nonnull NSNumber *)reactTag withText:(NSString*)text) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+    AudioServicesPlaySystemSound(1104);
     [_bridge.eventDispatcher sendTextEventWithType:RCTTextEventTypeSubmit
                                 reactTag:reactTag
                                 text:view.attributedText.string
@@ -84,6 +86,7 @@ RCT_EXPORT_METHOD(submitEditing:(nonnull NSNumber *)reactTag withText:(NSString*
 
 RCT_EXPORT_METHOD(insertKey:(nonnull NSNumber *)reactTag withText:(NSString*)text) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+    AudioServicesPlaySystemSound(1104);
     [_bridge.eventDispatcher sendTextEventWithType:RCTTextEventTypeKeyPress
                                 reactTag:reactTag
                                 text:view.attributedText.string
