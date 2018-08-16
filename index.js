@@ -94,7 +94,7 @@ export class CustomTextInput extends Component {
     if (ref) {
       this.input = ref;
     }
-    return this.props.onRef && this.props.onRef(ref);
+    return this.props.inputRef && this.props.inputRef(ref);
   };
   render() {
     const { customKeyboardType, ...others } = this.props;
