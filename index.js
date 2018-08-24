@@ -85,7 +85,7 @@ export class CustomTextInput extends Component {
 
   componentDidMount() {
     // without this delay, the keyboard sometimes fails to install
-    setTimeout(() => installKeyboard(this.props), 100)
+    setTimeout(() => this.installKeyboard(this.props), 100)
   }
   componentWillReceiveProps(newProps) {
     if (this.props.customKeyboardType && newProps.customKeyboardType && newProps.customKeyboardType !== this.props.customKeyboardType) {
