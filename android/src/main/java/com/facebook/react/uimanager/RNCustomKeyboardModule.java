@@ -22,6 +22,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.react.views.textinput.ReactEditText;
 import com.facebook.react.ReactInstanceManager;
@@ -29,6 +30,7 @@ import com.facebook.react.ReactInstanceManager;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     private static final String TAG = "RNCustomKeyboardModule";
@@ -157,11 +159,13 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                 sendFocusChangeListener(edit, hasFocus);
                 if (hasFocus) {
                     showKeyboard(activity, edit);
+                    sendEvent("keyboardDidShow", null);
                 } else {
                     mHandler.removeCallbacksAndMessages(null);
                     View keyboard = (View) edit.getTag(TAG_ID);
                     if (keyboard.getParent() != null) {
                         ((ViewGroup) keyboard.getParent()).removeView(keyboard);
+                        sendEvent("keyboardDidHide", null);
                     }
                 }
             }
@@ -405,5 +409,13 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
       return "CustomKeyboard";
+    }
+
+    /* package */ void sendEvent(String eventName, @Nullable WritableMap params) {
+    if (rnInstanceManager != null) {
+        rnInstanceManager.getCurrentReactContext()
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit(eventName, params);
+        }
     }
 }
