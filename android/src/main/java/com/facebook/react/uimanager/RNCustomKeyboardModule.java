@@ -3,6 +3,7 @@ package com.facebook.react.uimanager;
 
 import android.app.Application;
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +25,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.views.textinput.ReactEditText;
 import com.facebook.react.ReactInstanceManager;
 
@@ -48,6 +50,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     private Map<Integer, Integer> mKeyboardToMaxInputLength = new HashMap<>();
+    private Map<Integer, Integer> mKeyboardToHeight = new HashMap<>();
 
     public RNCustomKeyboardModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -76,7 +79,9 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
         return (ReactEditText) uii.getNativeViewHierarchyManager().resolveView(id);
     }
 
-    private void showKeyboard (final Activity activity, final ReactEditText edit) {
+    private void showKeyboard (final Activity activity, final ReactEditText edit, final int tag) {
+        final RNCustomKeyboardModule self = this;
+
         final ResultReceiver receiver = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -89,6 +94,22 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                             if (keyboard.getParent() == null && edit.isFocused()) {
 //                                Log.i(TAG, "showKeyboard +++++++++");
                                 activity.addContentView(keyboard, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                                Integer keyboardHeight = mKeyboardToHeight.get(tag);
+                                if (null != keyboardHeight){
+                                    final View rootView = self.rootView.getRootView();
+                                    final Rect visibleViewArea = new Rect();
+                                    rootView.getWindowVisibleDisplayFrame(visibleViewArea);
+
+                                    WritableMap params = Arguments.createMap();
+                                    WritableMap coordinates = Arguments.createMap();
+                                    coordinates.putDouble("screenY", PixelUtil.toDIPFromPixel(visibleViewArea.bottom-keyboardHeight));
+                                    coordinates.putDouble("screenX", PixelUtil.toDIPFromPixel(visibleViewArea.left));
+                                    coordinates.putDouble("width", PixelUtil.toDIPFromPixel(visibleViewArea.width()));
+                                    coordinates.putDouble("height", PixelUtil.toDIPFromPixel(keyboardHeight));
+                                    params.putMap("endCoordinates", coordinates);
+                                    self.sendEvent("keyboardDidShow", params);
+                                }
                             }
                         }
                     }, 50);
@@ -158,8 +179,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                 Log.i(TAG, "onFocusChange hasFocus=" + hasFocus);
                 sendFocusChangeListener(edit, hasFocus);
                 if (hasFocus) {
-                    showKeyboard(activity, edit);
-                    sendEvent("keyboardDidShow", null);
+                    showKeyboard(activity, edit, tag);
                 } else {
                     mHandler.removeCallbacksAndMessages(null);
                     View keyboard = (View) edit.getTag(TAG_ID);
@@ -176,6 +196,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     public void install(final int tag, final String type, final int maxInputLength, final int height) {
         installRetryRef = 0;
         mKeyboardToMaxInputLength.put(tag, maxInputLength);
+        mKeyboardToHeight.put(tag, height);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
