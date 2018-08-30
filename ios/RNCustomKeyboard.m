@@ -32,6 +32,12 @@ RCT_EXPORT_METHOD(install:(nonnull NSNumber *)reactTag withType:(nonnull NSStrin
     
     _inputView.autoresizingMask = UIViewAutoresizingNone;
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+
+    //* temporarily solution for duplicating default text
+    //* the first call of "insertText" when default text is existed, default text will be copied after inserting text.
+    //* I couldn't find exactly reason but this protects duplicating text.
+    [view replaceRange:view.selectedTextRange withText:@""];
+
     _inputView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, inputViewHeight);
     _inputView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
     
