@@ -2,7 +2,7 @@
 #import "RNCustomKeyboard.h"
 #import <React/RCTBridge+Private.h>
 #import <React/RCTUIManager.h>
-#import <RCTText/RCTBaseTextInputView.h>
+#import <../Libraries/Text/TextInput/RCTBaseTextInputView.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 @implementation RNCustomKeyboard
