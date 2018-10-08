@@ -402,6 +402,25 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void clearText(final int tag) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Activity activity = getCurrentActivity();
+                final ReactEditText edit = getEditById(tag);
+                if (edit == null) {
+                    return;
+                }
+
+                int end = Math.max(edit.getSelectionEnd(), 0);
+                if (0 != end) {
+                    edit.getText().delete(0, end);
+                }
+            }
+        });
+    }
+
+    @ReactMethod
     public void switchSystemKeyboard(final int tag) {
         mHandler.post(new Runnable() {
             @Override
