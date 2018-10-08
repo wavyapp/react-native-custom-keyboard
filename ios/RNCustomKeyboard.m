@@ -160,6 +160,20 @@ RCT_EXPORT_METHOD(moveRight:(nonnull NSNumber *)reactTag) {
     view.selectedTextRange = [view textRangeFromPosition: position toPosition:position];
 }
 
+RCT_EXPORT_METHOD(clearText:(nonnull NSNumber *)reactTag) {
+    UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+    
+    UITextRange* range = view.selectedTextRange;
+    
+    const NSInteger distance = [view offsetFromPosition:view.beginningOfDocument toPosition:range.end];
+    if (0 < distance) {
+        UITextRange* rangeToDelete = [view textRangeFromPosition:view.beginningOfDocument toPosition:range.end];
+        if (rangeToDelete) {
+            [view replaceRange:rangeToDelete withText:@""];
+        }
+    }
+}
+
 RCT_EXPORT_METHOD(switchSystemKeyboard:(nonnull NSNumber*) reactTag) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
     UIView* inputView = view.inputView;
