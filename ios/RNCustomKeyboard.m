@@ -174,6 +174,10 @@ RCT_EXPORT_METHOD(deleteLeftAll:(nonnull NSNumber *)reactTag) {
     }
 }
 
+RCT_EXPORT_METHOD(hideKeyboard:(nonnull NSNumber *)reactTag) {
+    [self switchSystemKeyboard:reactTag];
+}
+
 RCT_EXPORT_METHOD(switchSystemKeyboard:(nonnull NSNumber*) reactTag) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
     UIView* inputView = view.inputView;
