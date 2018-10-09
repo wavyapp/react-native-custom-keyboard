@@ -402,7 +402,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void clearText(final int tag) {
+    public void deleteLeftAll(final int tag) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {

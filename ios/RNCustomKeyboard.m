@@ -160,7 +160,7 @@ RCT_EXPORT_METHOD(moveRight:(nonnull NSNumber *)reactTag) {
     view.selectedTextRange = [view textRangeFromPosition: position toPosition:position];
 }
 
-RCT_EXPORT_METHOD(clearText:(nonnull NSNumber *)reactTag) {
+RCT_EXPORT_METHOD(deleteLeftAll:(nonnull NSNumber *)reactTag) {
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
     
     UITextRange* range = view.selectedTextRange;
