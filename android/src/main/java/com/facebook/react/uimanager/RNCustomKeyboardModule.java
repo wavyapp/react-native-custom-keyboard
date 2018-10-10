@@ -75,8 +75,15 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     }
 
     private ReactEditText getEditById(int id) throws IllegalViewOperationException{
-        UIViewOperationQueue uii = this.getReactApplicationContext().getNativeModule(UIManagerModule.class).getUIImplementation().getUIViewOperationQueue();
-        return (ReactEditText) uii.getNativeViewHierarchyManager().resolveView(id);
+        try {
+            UIViewOperationQueue uii = this.getReactApplicationContext().getNativeModule(UIManagerModule.class).getUIImplementation().getUIViewOperationQueue();
+            return (ReactEditText) uii.getNativeViewHierarchyManager().resolveView(id);
+        }
+        catch(Exception e) {
+            Log.i(TAG, "failed to getEditById " + e.getMessage());
+        }
+
+        return null;
     }
 
     private void showKeyboard (final Activity activity, final ReactEditText edit, final int tag) {
@@ -183,7 +190,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                 } else {
                     mHandler.removeCallbacksAndMessages(null);
                     View keyboard = (View) edit.getTag(TAG_ID);
-                    if (keyboard.getParent() != null) {
+                    if (keyboard != null && keyboard.getParent() != null) {
                         ((ViewGroup) keyboard.getParent()).removeView(keyboard);
                         sendEvent("keyboardDidHide", null);
                     }
@@ -432,10 +439,12 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                 }
 
                 View keyboard = (View) edit.getTag(TAG_ID);
-                if (keyboard.getParent() != null) {
+                if (keyboard != null && keyboard.getParent() != null) {
                     ((ViewGroup) keyboard.getParent()).removeView(keyboard);
                     sendEvent("keyboardDidHide", null);
                 }
+
+                edit.clearFocus();
             }
         });
     }
