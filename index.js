@@ -76,7 +76,7 @@ export class CustomTextInput extends Component {
 
   installKeyboard({ maxLength, customKeyboardType }) {
     if (!this.input) {
-      console.warn('installKeyboard fired without input ref'))
+      console.warn('installKeyboard fired without input ref');
       return;
     }
     install(
