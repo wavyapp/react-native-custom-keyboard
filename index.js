@@ -72,19 +72,25 @@ export class CustomTextInput extends Component {
     ...TextInput.propTypes,
     customKeyboardType: PropTypes.string,
   };
-
+  this.input = () => null;
 
   installKeyboard({ maxLength, customKeyboardType }) {
     if (!this.input) {
       console.warn('installKeyboard fired without input ref');
       return;
     }
-    install(
-      findNodeHandle(this.input || null),
-      customKeyboardType,
-      maxLength === undefined ? 1024 : maxLength,
-      getKeyboardHeightByType(customKeyboardType)
-    );
+    try {
+      const node = findNodeHandle(this.input || null);
+      install(
+        node,
+        customKeyboardType,
+        maxLength === undefined ? 1024 : maxLength,
+        getKeyboardHeightByType(customKeyboardType)
+      );
+    } catch {
+      console.warn('installKeyboard fired without input ref');
+      return;
+    }
   }
 
   componentDidMount() {
