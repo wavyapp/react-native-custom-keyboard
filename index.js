@@ -72,7 +72,8 @@ export class CustomTextInput extends Component {
     ...TextInput.propTypes,
     customKeyboardType: PropTypes.string,
   };
-  this.input = () => null;
+  
+  input = () => null
 
   installKeyboard({ maxLength, customKeyboardType }) {
     if (!this.input) {
