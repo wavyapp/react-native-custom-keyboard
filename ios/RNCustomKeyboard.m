@@ -2,7 +2,7 @@
 #import "RNCustomKeyboard.h"
 #import <React/RCTBridge+Private.h>
 #import <React/RCTUIManager.h>
-#import <RCTText/RCTBaseTextInputView.h>
+#import <../Libraries/Text/TextInput/RCTBaseTextInputView.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 @implementation RNCustomKeyboard
@@ -32,6 +32,12 @@ RCT_EXPORT_METHOD(install:(nonnull NSNumber *)reactTag withType:(nonnull NSStrin
     
     _inputView.autoresizingMask = UIViewAutoresizingNone;
     UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+
+    //* temporarily solution for duplicating default text
+    //* the first call of "insertText" when default text is existed, default text will be copied after inserting text.
+    //* I couldn't find exactly reason but this protects duplicating text.
+    [view replaceRange:view.selectedTextRange withText:@""];
+
     _inputView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, inputViewHeight);
     _inputView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0];
     
@@ -152,6 +158,24 @@ RCT_EXPORT_METHOD(moveRight:(nonnull NSNumber *)reactTag) {
     }
     
     view.selectedTextRange = [view textRangeFromPosition: position toPosition:position];
+}
+
+RCT_EXPORT_METHOD(deleteLeftAll:(nonnull NSNumber *)reactTag) {
+    UITextView *view = (UITextView *)(((RCTBaseTextInputView*)[_bridge.uiManager viewForReactTag:reactTag]).backedTextInputView);
+    
+    UITextRange* range = view.selectedTextRange;
+    
+    const NSInteger distance = [view offsetFromPosition:view.beginningOfDocument toPosition:range.end];
+    if (0 < distance) {
+        UITextRange* rangeToDelete = [view textRangeFromPosition:view.beginningOfDocument toPosition:range.end];
+        if (rangeToDelete) {
+            [view replaceRange:rangeToDelete withText:@""];
+        }
+    }
+}
+
+RCT_EXPORT_METHOD(hideKeyboard:(nonnull NSNumber *)reactTag) {
+    [self switchSystemKeyboard:reactTag];
 }
 
 RCT_EXPORT_METHOD(switchSystemKeyboard:(nonnull NSNumber*) reactTag) {

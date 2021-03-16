@@ -3,6 +3,7 @@ package com.facebook.react.uimanager;
 
 import android.app.Application;
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,15 +23,20 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.views.textinput.ReactEditText;
 import com.facebook.react.ReactInstanceManager;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
+    final long KEYBOARD_ANI_DURATION = 50;
+
     private static final String TAG = "RNCustomKeyboardModule";
     private static final int DEFAULT_TIMEOUT = 200;
     private static final int RETRY_COUNT = 5;
@@ -46,6 +52,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     private Map<Integer, Integer> mKeyboardToMaxInputLength = new HashMap<>();
+    private Map<Integer, Integer> mKeyboardToHeight = new HashMap<>();
 
     public RNCustomKeyboardModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -70,16 +77,41 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     }
 
     private ReactEditText getEditById(int id) throws IllegalViewOperationException{
-        UIViewOperationQueue uii = this.getReactApplicationContext().getNativeModule(UIManagerModule.class).getUIImplementation().getUIViewOperationQueue();
-        return (ReactEditText) uii.getNativeViewHierarchyManager().resolveView(id);
+        try {
+            UIViewOperationQueue uii = this.getReactApplicationContext().getNativeModule(UIManagerModule.class).getUIImplementation().getUIViewOperationQueue();
+            return (ReactEditText) uii.getNativeViewHierarchyManager().resolveView(id);
+        }
+        catch(Exception e) {
+            Log.i(TAG, "failed to getEditById " + e.getMessage());
+        }
+
+        return null;
     }
 
-    private void showKeyboard (final Activity activity, final ReactEditText edit) {
+    private void showKeyboard (final Activity activity, final ReactEditText edit, final int tag) {
+        final RNCustomKeyboardModule self = this;
+
         final ResultReceiver receiver = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
 //                Log.i(TAG, "showKeyboard ------ resultCode=" + resultCode);
                 if (resultCode == InputMethodManager.RESULT_UNCHANGED_HIDDEN || resultCode == InputMethodManager.RESULT_HIDDEN) {
+                    final Rect visibleViewArea = new Rect();
+                    rootView.getWindowVisibleDisplayFrame(visibleViewArea);
+                    final Integer keyboardHeight = mKeyboardToHeight.get(tag);
+
+                    if (null != keyboardHeight ) {
+                        WritableMap params = Arguments.createMap();
+                        WritableMap coordinates = Arguments.createMap();
+                        coordinates.putDouble("screenY", PixelUtil.toDIPFromPixel(visibleViewArea.bottom-keyboardHeight));
+                        coordinates.putDouble("screenX", PixelUtil.toDIPFromPixel(visibleViewArea.left));
+                        coordinates.putDouble("width", PixelUtil.toDIPFromPixel(visibleViewArea.width()));
+                        coordinates.putDouble("height", keyboardHeight);
+                        params.putMap("endCoordinates", coordinates);
+                        params.putInt("duration", (int)KEYBOARD_ANI_DURATION);
+                        self.sendEvent("keyboardWillShow", params);
+                    }
+
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -87,9 +119,22 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                             if (keyboard.getParent() == null && edit.isFocused()) {
 //                                Log.i(TAG, "showKeyboard +++++++++");
                                 activity.addContentView(keyboard, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                                if (null != keyboardHeight){
+                                    final View rootView = self.rootView.getRootView();
+
+                                    WritableMap params = Arguments.createMap();
+                                    WritableMap coordinates = Arguments.createMap();
+                                    coordinates.putDouble("screenY", PixelUtil.toDIPFromPixel(visibleViewArea.bottom-keyboardHeight));
+                                    coordinates.putDouble("screenX", PixelUtil.toDIPFromPixel(visibleViewArea.left));
+                                    coordinates.putDouble("width", PixelUtil.toDIPFromPixel(visibleViewArea.width()));
+                                    coordinates.putDouble("height", keyboardHeight);
+                                    params.putMap("endCoordinates", coordinates);
+                                    self.sendEvent("keyboardDidShow", params);
+                                }
                             }
                         }
-                    }, 50);
+                    }, KEYBOARD_ANI_DURATION);
                 }
             }
         };
@@ -156,12 +201,18 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
                 Log.i(TAG, "onFocusChange hasFocus=" + hasFocus);
                 sendFocusChangeListener(edit, hasFocus);
                 if (hasFocus) {
-                    showKeyboard(activity, edit);
+                    showKeyboard(activity, edit, tag);
                 } else {
                     mHandler.removeCallbacksAndMessages(null);
                     View keyboard = (View) edit.getTag(TAG_ID);
-                    if (keyboard.getParent() != null) {
+                    if (keyboard != null && keyboard.getParent() != null) {
                         ((ViewGroup) keyboard.getParent()).removeView(keyboard);
+
+                        WritableMap params = Arguments.createMap();
+                        params.putInt("duration", (int)KEYBOARD_ANI_DURATION);
+                        sendEvent("keyboardWillHide", params);
+
+                        sendEvent("keyboardDidHide", null);
                     }
                 }
             }
@@ -172,6 +223,7 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     public void install(final int tag, final String type, final int maxInputLength, final int height) {
         installRetryRef = 0;
         mKeyboardToMaxInputLength.put(tag, maxInputLength);
+        mKeyboardToHeight.put(tag, height);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -377,6 +429,51 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void deleteLeftAll(final int tag) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Activity activity = getCurrentActivity();
+                final ReactEditText edit = getEditById(tag);
+                if (edit == null) {
+                    return;
+                }
+
+                int end = Math.max(edit.getSelectionEnd(), 0);
+                if (0 != end) {
+                    edit.getText().delete(0, end);
+                }
+            }
+        });
+    }
+
+    @ReactMethod
+    public void hideKeyboard(final int tag) {
+        WritableMap params = Arguments.createMap();
+        params.putInt("duration", (int)KEYBOARD_ANI_DURATION);
+        sendEvent("keyboardWillHide", params);
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Activity activity = getCurrentActivity();
+                final ReactEditText edit = getEditById(tag);
+                if (edit == null) {
+                    return;
+                }
+
+                View keyboard = (View) edit.getTag(TAG_ID);
+                if (keyboard != null && keyboard.getParent() != null) {
+                    ((ViewGroup) keyboard.getParent()).removeView(keyboard);
+                    sendEvent("keyboardDidHide", null);
+                }
+
+                edit.clearFocus();
+            }
+        });
+    }
+
+    @ReactMethod
     public void switchSystemKeyboard(final int tag) {
         mHandler.post(new Runnable() {
             @Override
@@ -405,5 +502,15 @@ public class RNCustomKeyboardModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
       return "CustomKeyboard";
+    }
+
+    /* package */ void sendEvent(String eventName, @Nullable WritableMap params) {
+        Log.e("#CustomKeyboard", eventName + " try");
+    if (rnInstanceManager != null) {
+        rnInstanceManager.getCurrentReactContext()
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit(eventName, params);
+
+        }
     }
 }

@@ -2,3 +2,4 @@ build
 npm-debug*
 .idea
 node_modules
+android/.gradle/**/*
