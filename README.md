@@ -65,7 +65,9 @@ class MyKeyboard extends Component {
   }
 }
 
-register('hello', () => MyKeyboard);
+register('hello', {
+  factory: () => MyKeyboard
+});
 ```
 
 Use `CustomTextInput` instead of `TextInput`.
