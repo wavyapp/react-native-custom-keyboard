@@ -14,6 +14,6 @@
   "author": "ufolux",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.56"
+    "react-native": "^0.73"
   }
 }
