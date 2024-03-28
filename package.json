@@ -1,6 +1,6 @@
 {
   "name": "@wavyapp/react-native-custom-keyboard",
-  "version": "2.0.8",
+  "version": "2.1.0",
   "description": "react native custom keyboard for both Android and iOS",
   "main": "index.js",
   "scripts": {},
